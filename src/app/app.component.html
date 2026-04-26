@@ -1,0 +1,2960 @@
+<main class="login-shell" *ngIf="!isAuthenticated">
+  <section class="login-card">
+    <div class="login-visual" *ngIf="loginHasImage; else loginVisualFallback">
+      <img [src]="loginBrandImagePath" alt="Empresa" (error)="onLoginImageError()" />
+    </div>
+    <ng-template #loginVisualFallback>
+      <div class="login-visual login-visual--fallback">
+        <div class="login-visual__overlay">
+          <h2>Imagen corporativa</h2>
+          <p>Coloca tu imagen en <code>src/assets/login/login.png</code></p>
+        </div>
+      </div>
+    </ng-template>
+
+    <div class="login-form-wrap">
+      <p class="eyebrow">Acceso</p>
+      <h1>Iniciar sesión</h1>
+      <p class="subtitle">Usa tus credenciales para ingresar al sistema.</p>
+
+      <form #loginFormRef="ngForm" (ngSubmit)="loginToSystem()" class="form-grid">
+        <label>
+          <span>Usuario</span>
+          <input name="loginUsername" [(ngModel)]="loginUsername" autocomplete="username" required />
+        </label>
+
+        <label>
+          <span>Contraseña</span>
+          <div class="password-field-wrap">
+            <input
+              [type]="loginPasswordVisible ? 'text' : 'password'"
+              name="loginPassword"
+              [(ngModel)]="loginPassword"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="loginPasswordVisible = !loginPasswordVisible"
+              [attr.aria-label]="loginPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <svg *ngIf="!loginPasswordVisible" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg *ngIf="loginPasswordVisible" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19C5 19 1 12 1 12a21.77 21.77 0 0 1 5.06-5.94"></path>
+                <path d="M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.82 21.82 0 0 1-2.16 3.19"></path>
+                <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit" [disabled]="authLoading">{{ authLoading ? 'Ingresando...' : 'Ingresar' }}</button>
+        </div>
+
+        <p class="status status--error" *ngIf="authError">{{ authError }}</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<main class="shell" *ngIf="isAuthenticated">
+  <div class="toasts" aria-live="polite" aria-relevant="additions">
+    <div
+      class="toast"
+      *ngFor="let t of toasts"
+      [class.toast--success]="t.kind === 'success'"
+      [class.toast--error]="t.kind === 'error'"
+      (click)="dismissToast(t.id)"
+      role="status"
+    >
+      <div class="toast__body">{{ t.text }}</div>
+      <button class="toast__close" type="button" (click)="$event.stopPropagation(); dismissToast(t.id)" aria-label="Cerrar">
+        ✕
+      </button>
+    </div>
+  </div>
+  <aside class="sidebar" [class.sidebar--collapsed]="!sidebarOpen" (scroll)="onSidebarScroll()">
+    <div class="sidebar__header">
+      <div class="brand" [class.brand--collapsed]="!sidebarOpen">
+        <span class="brand__logoWrap" aria-hidden="true">
+          <img class="brand__logo" src="/assets/aluqen-logo.svg" alt="AluQen" />
+        </span>
+        <div class="brand__text">
+          <strong>AluQen</strong>
+          <p>Tecnología que impulsa tu crecimiento</p>
+        </div>
+      </div>
+
+      <div class="sidebar-toggle-wrapper" (click)="toggleSidebar()" aria-label="Alternar menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="sidebar__nav">
+
+    <nav class="menu">
+      <div class="menu__header" data-title="Dashboard" (click)="onMenuHeaderClick($event, 'dashboard')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">📊</span>
+        <span class="menu__title">Dashboard</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('dashboard')">▶</span>
+        <span class="tooltip tool-1">Dashboard</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('dashboard')">
+        <button class="menu__item" [class.menu__item--active]="view === 'dashboard'" (click)="setView('dashboard')">
+          <span class="menu__icon">📈</span> Vista general
+        </button>
+      </div>
+    </nav>
+
+<nav class="menu">
+<div class="menu__header" data-title="Clientes" (click)="onMenuHeaderClick($event, 'clients')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">👥</span>
+        <span class="menu__title">Clientes</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('clients')">▶</span>
+        <span class="tooltip tool-2">Clientes</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('clients')">
+        <button class="menu__item" [class.menu__item--active]="view === 'clients'" (click)="openClients()">
+          <span class="menu__icon">🗂️</span> Gestión
+        </button>
+      </div>
+    </nav>
+
+    <nav class="menu">
+<div class="menu__header" data-title="Pedidos" (click)="onMenuHeaderClick($event, 'orders')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">📦</span>
+        <span class="menu__title">Pedidos</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('orders')">▶</span>
+        <span class="tooltip tool-3">Pedidos</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('orders')">
+        <button class="menu__item" [class.menu__item--active]="view === 'orders-list'" (click)="openOrdersList()">
+          <span class="menu__icon">📋</span> Lista
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'orders-new'" (click)="openNewOrder()">
+          <span class="menu__icon">➕</span> Nuevo
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'orders-history'" (click)="openOrderHistory()">
+          <span class="menu__icon">📜</span> Historial
+        </button>
+      </div>
+    </nav>
+
+    <nav class="menu">
+<div class="menu__header" data-title="Programación / Rutas" (click)="onMenuHeaderClick($event, 'routes')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">🗺️</span>
+        <span class="menu__title">Programación / Rutas</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('routes')">▶</span>
+        <span class="tooltip tool-4">Programación</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('routes')">
+        <button class="menu__item" [class.menu__item--active]="view === 'routes-daily'" (click)="openRoutesDaily()">
+          <span class="menu__icon">📅</span> Rutas diarias
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'routes-assignment'" (click)="openRoutesAssignment()">
+          <span class="menu__icon">🚛</span> Asignación
+        </button>
+      </div>
+    </nav>
+
+    <nav class="menu">
+<div class="menu__header" data-title="Vehículos" (click)="onMenuHeaderClick($event, 'vehicles')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">🚚</span>
+        <span class="menu__title">Vehículos</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('vehicles')">▶</span>
+        <span class="tooltip tool-5">Vehículos</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('vehicles')">
+        <button class="menu__item" [class.menu__item--active]="view === 'vehicles-list'" (click)="openVehiclesList()">
+          <span class="menu__icon">📋</span> Lista
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'vehicles-new'" (click)="openNewVehicle()">
+          <span class="menu__icon">➕</span> Nuevo
+        </button>
+      </div>
+    </nav>
+
+    <nav class="menu">
+<div class="menu__header" data-title="Choferes" (click)="onMenuHeaderClick($event, 'drivers')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">👨‍🚒</span>
+        <span class="menu__title">Choferes</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('drivers')">▶</span>
+        <span class="tooltip tool-6">Choferes</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('drivers')">
+        <button class="menu__item" [class.menu__item--active]="view === 'drivers-list'" (click)="openDriversList()">
+          <span class="menu__icon">📋</span> Lista
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'drivers-new'" (click)="openNewDriver()">
+          <span class="menu__icon">➕</span> Nuevo
+        </button>
+      </div>
+    </nav>
+
+    <nav class="menu">
+<div class="menu__header" data-title="Facturación" (click)="onMenuHeaderClick($event, 'billing')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">🧾</span>
+        <span class="menu__title">Facturación</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('billing')">▶</span>
+        <span class="tooltip tool-7">Facturación</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('billing')">
+        <button
+          class="menu__item"
+          [class.menu__item--active]="view === 'billing-boletas' || view === 'billing-facturas' || view === 'billing-credit-notes' || view === 'billing-sunat' || view === 'billing-issued'"
+          (click)="openBilling()"
+        >
+          <span class="menu__icon">🗂️</span> Gestión
+        </button>
+      </div>
+    </nav>
+
+    <nav class="menu">
+<div class="menu__header" data-title="Reportes" (click)="onMenuHeaderClick($event, 'reports')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">📈</span>
+        <span class="menu__title">Reportes</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('reports')">▶</span>
+        <span class="tooltip tool-8">Reportes</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('reports')">
+        <button class="menu__item" [class.menu__item--active]="view === 'reports'" (click)="openReports(reportsTab || 'sales')">
+          <span class="menu__icon">🗂️</span> Gestión
+        </button>
+      </div>
+    </nav>
+
+    <nav class="menu">
+      <div class="menu__header" data-title="Configuración" (click)="onMenuHeaderClick($event, 'config')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">⚙️</span>
+        <span class="menu__title">Configuración</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('config')">▶</span>
+        <span class="tooltip tool-9">Configuración</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('config')">
+       <button class="menu__item" [class.menu__item--active]="view === 'config-company'" (click)="openConfigCompany()">
+          <span class="menu__icon">🏢</span> Empresa
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'config-igv'" (click)="openConfigIgv()">
+          <span class="menu__icon">📊</span> IGV
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'config-certificate'" (click)="openConfigCertificate()">
+          <span class="menu__icon">🔐</span> Certificado
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'config-series'" (click)="openConfigSeries()">
+          <span class="menu__icon">🔢</span> Series
+        </button>
+      </div>
+    </nav>
+
+    <nav class="menu">
+      <div class="menu__header" data-title="Usuarios" (click)="onMenuHeaderClick($event, 'users')" (mouseenter)="showMenuTooltip($event)" (mousemove)="moveMenuTooltip($event)" (mouseleave)="hideMenuTooltip()">
+        <span class="menu__icon">🔐</span>
+        <span class="menu__title">Usuarios</span>
+        <span class="menu__arrow" [class.menu__arrow--open]="isExpanded('users')">▶</span>
+        <span class="tooltip tool-10">Usuarios</span>
+      </div>
+      <div class="menu__items" [class.menu__items--open]="isExpanded('users')">
+        <button class="menu__item" [class.menu__item--active]="view === 'users-list'" (click)="openUsersList()">
+          <span class="menu__icon">👥</span> Usuarios
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'users-new'" (click)="openNewUser()">
+          <span class="menu__icon">➕</span> Nuevo usuario
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'roles-list' || view === 'roles-new'" (click)="openRolesList()">
+          <span class="menu__icon">🎭</span> Roles
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'permissions-list'" (click)="openPermissionsList()">
+          <span class="menu__icon">🔑</span> Permisos
+        </button>
+        <button class="menu__item" [class.menu__item--active]="view === 'security-audit'" (click)="openSecurityAudit()">
+          <span class="menu__icon">🛡️</span> Auditoría
+        </button>
+      </div>
+    </nav>
+
+    </div>
+
+    <div class="sidebar__footer">
+      <div class="sidebar-session" *ngIf="sidebarOpen">
+        <strong>{{ authUsername }}</strong>
+        <span>{{ authRole }}</span>
+        <small *ngIf="authIsTemporary">Temporal hasta {{ formatAuthExpiresAt() }}</small>
+      </div>
+      <button class="sidebar-logout" type="button" (click)="logoutFromSystem()" aria-label="Cerrar sesión">
+        <span class="sidebar-logout__icon">⏻</span>
+        <span class="sidebar-logout__label" *ngIf="sidebarOpen">Salir</span>
+      </button>
+    </div>
+  </aside>
+
+  <div
+    class="menu-tooltip-overlay"
+    [class.menu-tooltip-overlay--visible]="menuTooltipVisible"
+    [style.left.px]="menuTooltipX"
+    [style.top.px]="menuTooltipY"
+  >
+    {{ menuTooltipText }}
+  </div>
+
+  <div
+    class="menu-popover-overlay"
+    [class.menu-popover-overlay--visible]="menuPopoverVisible"
+    [style.left.px]="menuPopoverX"
+    [style.top.px]="menuPopoverY"
+    (mouseenter)="hoveringMenuPopover = true"
+    (mouseleave)="hoveringMenuPopover = false"
+  >
+    <div class="menu-popover__title">{{ menuPopoverTitle }}</div>
+    <button
+      class="menu-popover__item"
+      type="button"
+      *ngFor="let item of menuPopoverItems"
+      (click)="onMenuPopoverItemClick(item)"
+    >
+      {{ item.label }}
+    </button>
+  </div>
+
+  <div class="modal-backdrop" [class.modal-backdrop--visible]="assignModalOpen" (click)="closeAssignModal()"></div>
+  <div class="modal" [class.modal--visible]="assignModalOpen" (click)="$event.stopPropagation()">
+    <div class="modal__head">
+      <div>
+        <div class="modal__title">Asignar vehiculo y chofer</div>
+        <div class="modal__subtitle" *ngIf="assignModalOrderId !== null">Pedido #{{ assignModalOrderId }}</div>
+      </div>
+      <button class="modal__close" type="button" (click)="closeAssignModal()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="modal__body form-grid">
+      <label>
+        <span>Vehiculo</span>
+        <select [(ngModel)]="assignModalVehicleId" name="assignModalVehicleId">
+          <option [ngValue]="null" disabled>Selecciona vehiculo</option>
+          <option *ngFor="let vehicle of vehicles" [ngValue]="vehicle.id">{{ vehicle.plate }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Chofer</span>
+        <select [(ngModel)]="assignModalDriverId" name="assignModalDriverId">
+          <option [ngValue]="null" disabled>Selecciona chofer</option>
+          <option *ngFor="let driver of drivers" [ngValue]="driver.id">{{ driver.name }}</option>
+        </select>
+      </label>
+
+      <p class="status status--error" *ngIf="assignModalError">{{ assignModalError }}</p>
+    </div>
+
+  <div class="modal__actions">
+      <button class="primary" type="button" (click)="confirmAssignModal()">Guardar</button>
+      <button class="secondary" type="button" (click)="closeAssignModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" [class.modal-backdrop--visible]="addressFixModalOpen" (click)="closeAddressFixModal()"></div>
+  <div class="modal" [class.modal--visible]="addressFixModalOpen" (click)="$event.stopPropagation()">
+    <div class="modal__head">
+      <div>
+        <div class="modal__title">Corregir direccion</div>
+        <div class="modal__subtitle" *ngIf="addressFixOrderId !== null">Pedido #{{ addressFixOrderId }}</div>
+      </div>
+      <button class="modal__close" type="button" (click)="closeAddressFixModal()" aria-label="Cerrar">�o</button>
+    </div>
+
+    <div class="modal__body form-grid">
+      <label>
+        <span>Link de Google Maps (opcional)</span>
+        <input
+          name="addressFixMapsUrl"
+          [(ngModel)]="addressFixMapsUrl"
+          placeholder="https://www.google.com/maps/..."
+          (keydown.enter)="$event.preventDefault(); resolveAddressFixFromMaps()"
+        />
+      </label>
+
+      <div class="form-actions" style="margin-top:0;">
+        <button class="primary" type="button" (click)="resolveAddressFixFromMaps()" [disabled]="addressFixResolving">
+          {{ addressFixResolving ? 'Buscando...' : 'Obtener nombre' }}
+        </button>
+      </div>
+
+      <label>
+        <span>Direccion final</span>
+        <input name="addressFixAddress" [(ngModel)]="addressFixAddress" placeholder="Ej: Av. Grau 123, Lima" />
+      </label>
+
+      <p class="status status--success" *ngIf="addressFixResolvedLabel">Detectado: {{ addressFixResolvedLabel }}</p>
+      <p class="status status--error" *ngIf="addressFixError">{{ addressFixError }}</p>
+    </div>
+
+    <div class="modal__actions">
+      <button class="primary" type="button" (click)="saveAddressFix()" [disabled]="addressFixSaving">
+        {{ addressFixSaving ? 'Guardando...' : 'Guardar' }}
+      </button>
+      <button class="secondary" type="button" (click)="closeAddressFixModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" [class.modal-backdrop--visible]="billingFolderModalOpen" (click)="closeBillingFolderModal()"></div>
+  <div class="modal" [class.modal--visible]="billingFolderModalOpen" (click)="$event.stopPropagation()">
+    <div class="modal__head">
+      <div>
+        <div class="modal__title">Carpeta local</div>
+        <div class="modal__subtitle">Ruta del disco local</div>
+      </div>
+      <button class="modal__close" type="button" (click)="closeBillingFolderModal()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="modal__body">
+      <div class="card" style="padding:12px 14px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(148,163,184,0.12);">
+        <div style="color:#93a4be;font-size:0.9rem;margin-bottom:6px;">Ruta</div>
+        <div style="font-weight:650;">{{ billingFolderPath }}</div>
+      </div>
+    </div>
+
+    <div class="modal__actions">
+      <button class="secondary" type="button" (click)="copyBillingFolderPath()">Copiar ruta</button>
+      <button class="primary" type="button" (click)="closeBillingFolderModal()">Cerrar</button>
+    </div>
+  </div>
+
+  <section class="content" *ngIf="view === 'dashboard'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Dashboard</p>
+        <h1>Vista general</h1>
+        <p class="subtitle">Resumen rápido de pedidos, ventas y alertas del día.</p>
+      </div>
+      <div class="dashboard-notifs">
+        <button
+          type="button"
+          class="notif-btn"
+          (click)="toggleDashboardNotifications($event)"
+          [attr.aria-expanded]="dashboardNotificationsOpen"
+          aria-label="Notificaciones"
+        >
+          <span class="notif-btn__icon">🔔</span>
+          <span class="notif-btn__label">Notificaciones</span>
+          <span class="notif-btn__count" *ngIf="unreadDashboardNotificationsCount > 0">{{ unreadDashboardNotificationsCount }}</span>
+        </button>
+
+        <div class="notif-panel" *ngIf="dashboardNotificationsOpen">
+          <div class="notif-panel__head">
+            <strong>Alertas</strong>
+            <div class="notif-panel__head-actions">
+              <span>{{ unreadDashboardNotificationsCount }} sin leer</span>
+              <button type="button" class="notif-clear-btn" (click)="clearDashboardNotifications()">Limpiar</button>
+            </div>
+          </div>
+          <ul class="notif-list" *ngIf="dashboardNotifications.length > 0; else notifEmpty">
+            <li
+              *ngFor="let alert of dashboardNotifications"
+              [class.notif-list__item--read]="alert.read"
+              [class.notif-list__item--error]="alert.level === 'error'"
+              (mouseenter)="markDashboardNotificationRead(alert.id)"
+              (click)="markDashboardNotificationRead(alert.id)"
+            >
+              <span class="notif-dot" *ngIf="!alert.read"></span>
+              <div class="notif-item__body">
+                <span>{{ alert.text }}</span>
+                <small>{{ formatDashboardNotificationTime(alert.createdAt) }}</small>
+              </div>
+            </li>
+          </ul>
+          <ng-template #notifEmpty>
+            <p class="notif-empty">No hay alertas activas.</p>
+          </ng-template>
+        </div>
+      </div>
+    </header>
+
+    <section class="metrics">
+      <article class="card metric">
+        <span>Total pedidos hoy</span>
+        <strong>{{ todayOrders }}</strong>
+      </article>
+      <article class="card metric">
+        <span>Ventas del día</span>
+        <strong>{{ dailySales }}</strong>
+      </article>
+      <article class="card metric">
+        <span>Pedidos pendientes</span>
+        <strong>{{ pendingOrders }}</strong>
+      </article>
+      <article class="card metric">
+        <span>Pedidos completados</span>
+        <strong>{{ completedOrders }}</strong>
+      </article>
+    </section>
+
+    <section class="layout">
+      <article class="card chart-card">
+        <div class="section-head">
+          <h2>Ventas por día</h2>
+          <span>Últimos 7 días</span>
+        </div>
+
+        <div class="bars bars--sales">
+          <div class="bar-row" *ngFor="let item of salesByDay">
+            <span>{{ item.day }}</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="(item.value / maxSales) * 100"></div>
+            </div>
+            <strong>{{ item.value }}</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="card chart-card">
+        <div class="section-head">
+          <h2>Pedidos por zona</h2>
+          <span>Distribución actual</span>
+        </div>
+
+        <div class="zone-grid">
+          <div class="zone-item" *ngFor="let item of ordersByZone">
+            <div class="zone-item__top">
+              <span>{{ item.zone }}</span>
+              <strong>{{ item.value }}</strong>
+            </div>
+            <div class="zone-track">
+              <div class="zone-fill" [style.width.%]="(item.value / maxZones) * 100"></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+  </section>
+
+  <section class="content" *ngIf="view === 'clients'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Clientes</p>
+        <h1>Gestión de clientes</h1>
+        <p class="subtitle">Lista, registro, edición y eliminación de clientes con validación de documento.</p>
+      </div>
+      <div class="hero__badge">CRUD completo</div>
+    </header>
+
+    <section class="clients-layout">
+      <article class="card table-card" id="clients-list">
+        <div class="section-head">
+          <h2>Lista de clientes</h2>
+          <span>{{ clients.length }} registros</span>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Dirección</th>
+                <th>Contacto</th>
+                <th>Tipo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let client of clients">
+                <td>
+                  <strong>{{ client.documentType }}</strong><br />
+                  <span>{{ client.documentNumber }}</span>
+                </td>
+                <td>{{ client.name }}</td>
+                <td>{{ client.address }}</td>
+                <td>
+                  {{ client.phone }}<br />
+                  <span>{{ client.email }}</span>
+                </td>
+                <td>{{ client.clientType }}</td>
+                <td class="actions">
+                  <button type="button" (click)="editClient(client)">Editar</button>
+                  <button type="button" class="danger" (click)="deleteClient(client.id)">Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card form-card" id="clients-form">
+        <div class="section-head">
+          <h2>{{ editingId === null ? 'Nuevo cliente' : 'Editar cliente' }}</h2>
+          <span>Datos principales</span>
+        </div>
+
+        <form #clientFormRef="ngForm" (ngSubmit)="saveClient(clientFormRef)" class="form-grid">
+          <label>
+            <span>Tipo</span>
+            <select name="clientType" [(ngModel)]="clientForm.clientType" (change)="onClientTypeChange()" required>
+              <option value="empresa">Empresa</option>
+              <option value="persona">Persona</option>
+            </select>
+          </label>
+
+          <label>
+            <span>{{ documentLabel }}</span>
+            <input
+              name="documentNumber"
+              [(ngModel)]="clientForm.documentNumber"
+              (ngModelChange)="onClientDocumentChange()"
+              [placeholder]="documentLabel"
+              required
+            />
+          </label>
+
+          <label>
+            <div class="field-head">
+              <span>Razón social / Nombre</span>
+              <button
+                type="button"
+                class="field-action"
+                *ngIf="!clientNameEditable && clientNameAutoFilled"
+                (click)="enableClientNameEdit()"
+              >
+                Editar
+              </button>
+            </div>
+            <input
+              name="name"
+              [(ngModel)]="clientForm.name"
+              [disabled]="!clientNameEditable"
+              [placeholder]="clientNameEditable ? '' : 'Se completa por DNI/RUC'"
+              required
+            />
+          </label>
+
+          <label>
+            <div class="field-head">
+              <span>Dirección</span>
+              <button
+                type="button"
+                class="field-action"
+                *ngIf="!clientAddressEditable && clientAddressAutoFilled"
+                (click)="enableClientAddressEdit()"
+              >
+                Editar
+              </button>
+            </div>
+            <input
+              name="address"
+              [(ngModel)]="clientForm.address"
+              [disabled]="!clientAddressEditable"
+              [placeholder]="clientAddressEditable ? '' : 'Se completa por RUC'"
+            />
+          </label>
+
+          <label>
+            <span>Teléfono</span>
+            <input name="phone" [(ngModel)]="clientForm.phone" />
+          </label>
+
+          <label>
+            <span>Email</span>
+            <input type="email" name="email" [(ngModel)]="clientForm.email" />
+          </label>
+
+
+
+          <div class="form-actions">
+            <button class="primary" type="submit">{{ editingId === null ? 'Guardar' : 'Actualizar' }}</button>
+            <button class="secondary" type="button" (click)="cancelForm()">Limpiar</button>
+          </div>
+
+        </form>
+      </article>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'orders-list'" id="orders-list">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Pedidos</p>
+        <h1>Lista de pedidos</h1>
+        <p class="subtitle">Seguimiento operativo de solicitudes, asignaciones y estados.</p>
+      </div>
+      <div class="hero__badge">{{ orders.length }} pedidos</div>
+    </header>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Pedidos registrados</h2>
+        <span>CRUD operativo</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pedido</th>
+              <th>Cliente</th>
+                <th>Servicio</th>
+                <th>Zona</th>
+                <th>Cantidad</th>
+              <th>Precio x m³</th>
+              <th>Entrega</th>
+              <th>Estado</th>
+              <th>Vehículo / Chofer</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of orders">
+              <td>
+                <strong>#{{ order.id }}</strong><br />
+                <span>{{ order.deliveryAddress }}</span>
+              </td>
+              <td>{{ order.clientName }}</td>
+              <td>{{ order.serviceType }}</td>
+              <td>{{ order.zone }}</td>
+              <td>{{ order.quantity }} m³</td>
+              <td>S/ {{ order.price }}</td>
+              <td>{{ order.deliveryDate }}</td>
+              <td>{{ order.status }}</td>
+              <td>
+                {{ order.vehicle || 'Sin asignar' }}<br />
+                <span>{{ order.driver || 'Sin chofer' }}</span>
+              </td>
+              <td class="actions">
+                <div class="action-row action-row--top">
+                  <button type="button" class="action-primary" title="Asignar vehículo y chofer" (click)="assignVehicleAndDriver(order.id)">🚚 Asignar</button>
+                  <button type="button" title="Editar pedido" (click)="editOrder(order)">✏️ Editar</button>
+                </div>
+                <div class="action-row">
+                  <button type="button" title="Cambiar estado" (click)="changeOrderStatus(order.id)">🔄 Estado</button>
+                  <button type="button" class="danger" title="Eliminar pedido" (click)="deleteOrder(order.id)">🗑️ Eliminar</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'orders-new'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Pedidos</p>
+        <h1>Ventana Nuevo Pedido</h1>
+        <p class="subtitle">Genera pedidos, asigna vehículo y chofer, y controla su estado.</p>
+      </div>
+      <div class="hero__badge">Generar pedido</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>{{ editingOrderId === null ? 'Nuevo pedido' : 'Editar pedido' }}</h2>
+        <span>Campos del pedido</span>
+      </div>
+
+      <form #orderFormRef="ngForm" (ngSubmit)="saveOrder(orderFormRef)" class="form-grid order-grid">
+        <label>
+          <span>Cliente</span>
+          <select name="clientId" [(ngModel)]="orderForm.clientId" required>
+            <option [ngValue]="null" disabled>Selecciona un cliente</option>
+            <option *ngFor="let client of clients" [ngValue]="client.id">{{ client.name }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Dirección de entrega</span>
+          <input name="deliveryAddress" [(ngModel)]="orderForm.deliveryAddress" required />
+        </label>
+
+        <label>
+          <span>Tipo de servicio</span>
+          <select name="serviceType" [(ngModel)]="orderForm.serviceType" required>
+            <option *ngFor="let service of serviceTypes" [value]="service">{{ service }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Zona</span>
+          <select name="zone" [(ngModel)]="orderForm.zone" required>
+            <option *ngFor="let zone of zoneOptions" [value]="zone">{{ zone }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Cantidad (m³)</span>
+          <input type="number" name="quantity" [(ngModel)]="orderForm.quantity" min="1" required />
+        </label>
+
+        <label>
+          <span>Precio x m³</span>
+          <input type="number" name="price" [(ngModel)]="orderForm.price" min="0" required />
+        </label>
+
+        <label>
+          <span>Fecha entrega</span>
+          <input type="date" name="deliveryDate" [(ngModel)]="orderForm.deliveryDate" required />
+        </label>
+
+        <label>
+          <span>Estado</span>
+          <select name="status" [(ngModel)]="orderForm.status" required>
+            <option *ngFor="let status of orderStatusOptions" [value]="status">{{ status }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Vehículo</span>
+          <select name="vehicle" [(ngModel)]="orderForm.vehicle">
+            <option value="">Sin asignar</option>
+            <option *ngFor="let vehicle of vehicleOptions" [value]="vehicle">{{ vehicle }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Chofer</span>
+          <select name="driver" [(ngModel)]="orderForm.driver">
+            <option value="">Sin chofer</option>
+            <option *ngFor="let driver of driverOptions" [value]="driver">{{ driver }}</option>
+          </select>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">Generar pedido</button>
+          <button class="secondary" type="button" (click)="cancelOrderForm()">Limpiar</button>
+        </div>
+
+      </form>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'orders-history'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Pedidos</p>
+        <h1>Historial</h1>
+        <p class="subtitle">Registro de creación, asignación y cambios de estado.</p>
+      </div>
+      <div class="hero__badge">{{ orderHistory.length }} eventos</div>
+    </header>
+
+    <section class="card history-card">
+      <div class="section-head">
+        <h2>Actividad reciente</h2>
+        <span>Por pedido</span>
+      </div>
+
+      <div class="history-accordion">
+        <div class="history-item" *ngFor="let order of orders">
+          <button class="history-row" type="button" (click)="toggleOrderHistory(order.id)">
+            <div class="history-row__main">
+              <strong>Pedido #{{ order.id }}</strong>
+              <span>{{ order.clientName }} · {{ order.zone }} · {{ order.deliveryDate }}</span>
+            </div>
+            <div class="history-row__aside">
+              <span class="history-row__pill">{{ order.status }}</span>
+              <span class="history-row__chev" [class.history-row__chev--open]="isOrderHistoryExpanded(order.id)">▶</span>
+            </div>
+          </button>
+
+          <div class="history-detail" [class.history-detail--open]="isOrderHistoryExpanded(order.id)">
+            <div class="history-detail__meta">
+              <div>
+                <span>Último evento</span>
+                <strong>{{ lastOrderHistoryMessage(order) }}</strong>
+              </div>
+              <div>
+                <span>Servicio</span>
+                <strong>{{ order.serviceType }} · {{ order.quantity }} m³</strong>
+              </div>
+              <div>
+                <span>Entrega</span>
+                <strong>{{ order.deliveryAddress }}</strong>
+              </div>
+              <div>
+                <span>Vehículo / Chofer</span>
+                <strong>{{ order.vehicle || 'Sin asignar' }} · {{ order.driver || 'Sin chofer' }}</strong>
+              </div>
+            </div>
+
+            <ol class="history-detail__timeline">
+              <li *ngFor="let msg of order.history">{{ msg }}</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'routes-daily'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Programación / Rutas</p>
+        <h1>Rutas diarias</h1>
+        <p class="subtitle">Consulta pedidos por día y agrúpalos por zonas para planificar la salida.</p>
+      </div>
+      <div class="hero__badge">Mapa opcional</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Ver pedidos por día</h2>
+        <span>Filtrado operativo</span>
+      </div>
+
+      <div class="form-grid route-date-grid">
+        <label>
+          <span>Fecha</span>
+          <input type="date" [(ngModel)]="routeDate" name="routeDate" (ngModelChange)="onRouteDateChange()" />
+        </label>
+      </div>
+
+      <div class="route-summary">
+        <article class="route-summary__card">
+          <strong>{{ getOrdersForSelectedDate().length }}</strong>
+          <span>Pedidos del día</span>
+        </article>
+        <article class="route-summary__card">
+          <strong>{{ getOrdersForSelectedMonth().length }}</strong>
+          <span>Total del mes</span>
+        </article>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pedido</th>
+              <th>Cliente</th>
+              <th>Dirección</th>
+              <th>Zona</th>
+              <th>Servicio</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of getOrdersForSelectedDate()" class="route-row" (click)="focusRouteOrder(order.id)">
+              <td>#{{ order.id }}</td>
+              <td>{{ order.clientName }}</td>
+              <td class="route-address-cell">
+                <span class="route-address" [title]="order.deliveryAddress">{{ order.deliveryAddress }}</span>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Corregir direccion"
+                  (click)="openAddressFixModal(order); $event.stopPropagation()"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                      fill="currentColor"
+                      d="M12 2c4.13 0 7.5 3.36 7.5 7.5 0 5.63-6.17 11.61-7.05 12.44a.65.65 0 0 1-.9 0C10.67 21.11 4.5 15.13 4.5 9.5 4.5 5.36 7.87 2 12 2Zm0 4.1a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Z"
+                    />
+                  </svg>
+                </button>
+              </td>
+              <td>{{ order.zone }}</td>
+              <td>{{ order.serviceType }}</td>
+              <td>{{ order.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="map-box" [class.map-box--active]="routeMapEnabled">
+        <div class="section-head">
+          <h2>Mapa</h2>
+          <span>Vista diaria</span>
+        </div>
+        <div class="map-error" [class.map-error--visible]="routeMapError">
+          {{ routeMapError }}
+        </div>
+        <div class="map-canvas" id="routes-map"></div>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Agrupar por zonas</h2>
+        <span>Distribución diaria</span>
+      </div>
+
+      <div class="zone-grid">
+          <div class="zone-item" *ngFor="let item of getOrdersGroupedByZone()">
+            <div class="zone-item__top">
+              <span>{{ item.zone }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+            <div class="zone-track">
+              <div class="zone-fill" [style.width.%]="(item.count / getRouteZoneMax()) * 100"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'routes-assignment'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Programación / Rutas</p>
+        <h1>Asignación</h1>
+        <p class="subtitle">Asigna camión y chofer a cada ruta.</p>
+      </div>
+      <div class="hero__badge">Asignar camión / chofer</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Asignar</h2>
+        <span>Ruta operativa</span>
+      </div>
+
+      <div class="form-grid order-grid">
+        <label>
+          <span>Pedido</span>
+          <select [(ngModel)]="routeAssignmentOrderId" name="routeAssignmentOrderId">
+            <option [ngValue]="null">Selecciona un pedido</option>
+            <option *ngFor="let order of orders" [ngValue]="order.id">#{{ order.id }} - {{ order.clientName }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Camión</span>
+          <select [(ngModel)]="routeAssignmentVehicle" name="routeAssignmentVehicle">
+            <option value="">Selecciona camión</option>
+            <option *ngFor="let vehicle of vehicleOptions" [value]="vehicle">{{ vehicle }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Chofer</span>
+          <select [(ngModel)]="routeAssignmentDriver" name="routeAssignmentDriver">
+            <option value="">Selecciona chofer</option>
+            <option *ngFor="let driver of driverOptions" [value]="driver">{{ driver }}</option>
+          </select>
+        </label>
+
+        <div class="form-actions routes-actions">
+          <button class="primary" type="button" (click)="assignRoute()">Asignar</button>
+          <button class="secondary" type="button" (click)="refreshRouteData()">Actualizar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Asignaciones</h2>
+        <span>{{ routeAssignments.length }} rutas</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pedido</th>
+              <th>Camión</th>
+              <th>Chofer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of routeAssignments">
+              <td>#{{ item.orderId }}</td>
+              <td>{{ item.vehicle }}</td>
+              <td>{{ item.driver }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'vehicles-list'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Vehículos</p>
+        <h1>Cisternas</h1>
+        <p class="subtitle">Registro y control de unidades operativas.</p>
+      </div>
+      <div class="hero__badge">Lista</div>
+    </header>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Lista</h2>
+        <span>{{ vehicles.length }} vehículos</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Placa</th>
+              <th>Capacidad</th>
+              <th>Estado</th>
+              <th>SOAT</th>
+              <th>Revisión técnica</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let vehicle of vehicles">
+              <td>{{ vehicle.plate }}</td>
+              <td>{{ vehicle.capacity }} m³</td>
+              <td>{{ vehicle.status }}</td>
+              <td>{{ vehicle.soat }}</td>
+              <td>{{ vehicle.technicalReview }}</td>
+              <td class="actions">
+                <button type="button" (click)="editVehicle(vehicle)">Editar</button>
+                <button type="button" class="danger" (click)="deleteVehicle(vehicle.id)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'vehicles-new'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Vehículos</p>
+        <h1>Nuevo vehículo</h1>
+        <p class="subtitle">Registra una nueva cisterna con sus documentos vigentes.</p>
+      </div>
+      <div class="hero__badge">Nuevo vehículo</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>{{ editingVehicleId === null ? 'Nuevo vehículo' : 'Editar vehículo' }}</h2>
+        <span>Campos requeridos</span>
+      </div>
+
+      <form #vehicleFormRef="ngForm" id="vehicleFormRef" (ngSubmit)="saveVehicle(vehicleFormRef)" class="form-grid order-grid">
+        <label>
+          <span>Placa</span>
+          <input name="plate" [(ngModel)]="vehicleForm.plate" required />
+        </label>
+
+        <label>
+          <span>Capacidad (m³)</span>
+          <input type="number" name="capacity" [(ngModel)]="vehicleForm.capacity" min="1" required />
+        </label>
+
+        <label>
+          <span>Estado</span>
+          <select name="status" [(ngModel)]="vehicleForm.status" required>
+            <option *ngFor="let status of vehicleStatusOptions" [value]="status">{{ status }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>SOAT</span>
+          <input type="date" name="soat" [(ngModel)]="vehicleForm.soat" required />
+        </label>
+
+        <label>
+          <span>Revisión técnica</span>
+          <input type="date" name="technicalReview" [(ngModel)]="vehicleForm.technicalReview" required />
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">Guardar vehículo</button>
+          <button class="secondary" type="button" (click)="cancelVehicleForm()">Limpiar</button>
+        </div>
+
+      </form>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'drivers-list'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Choferes</p>
+        <h1>Lista</h1>
+        <p class="subtitle">Control de conductores y estado operativo.</p>
+      </div>
+      <div class="hero__badge">{{ drivers.length }} choferes</div>
+    </header>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Lista</h2>
+        <span>Choferes registrados</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>DNI</th>
+              <th>Licencia</th>
+              <th>Teléfono</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let driver of drivers">
+              <td>{{ driver.name }}</td>
+              <td>{{ driver.dni }}</td>
+              <td>{{ driver.license }}</td>
+              <td>{{ driver.phone }}</td>
+              <td>{{ driver.status }}</td>
+              <td class="actions">
+                <button type="button" (click)="editDriver(driver)">Editar</button>
+                <button type="button" class="danger" (click)="deleteDriver(driver.id)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'drivers-new'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Choferes</p>
+        <h1>Nuevo chofer</h1>
+        <p class="subtitle">Registra conductores para las rutas y asignaciones.</p>
+      </div>
+      <div class="hero__badge">Nuevo chofer</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>{{ editingDriverId === null ? 'Nuevo chofer' : 'Editar chofer' }}</h2>
+        <span>Campos requeridos</span>
+      </div>
+
+      <form #driverFormRef="ngForm" id="driverFormRef" (ngSubmit)="saveDriver(driverFormRef)" class="form-grid order-grid">
+        <label>
+          <div class="field-head">
+            <span>Nombre</span>
+            <button
+              type="button"
+              class="field-action"
+              *ngIf="!driverNameEditable && driverNameAutoFilled"
+              (click)="enableDriverNameEdit()"
+            >
+              Editar
+            </button>
+          </div>
+          <input
+            name="name"
+            [(ngModel)]="driverForm.name"
+            [disabled]="!driverNameEditable"
+            [placeholder]="driverNameEditable ? '' : 'Se completa por DNI'"
+            required
+          />
+        </label>
+
+        <label>
+          <span>DNI</span>
+          <input
+            name="dni"
+            [(ngModel)]="driverForm.dni"
+            maxlength="8"
+            required
+            (ngModelChange)="onDriverDniChange()"
+          />
+        </label>
+
+        <label>
+          <span>Licencia</span>
+          <input name="license" [(ngModel)]="driverForm.license" required />
+        </label>
+
+        <label>
+          <span>Teléfono</span>
+          <input name="phone" [(ngModel)]="driverForm.phone" required />
+        </label>
+
+        <label>
+          <span>Estado</span>
+          <select name="status" [(ngModel)]="driverForm.status" required>
+            <option *ngFor="let status of driverStatusOptions" [value]="status">{{ status }}</option>
+          </select>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">Guardar chofer</button>
+          <button class="secondary" type="button" (click)="cancelDriverForm()">Limpiar</button>
+        </div>
+
+      </form>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'billing-boletas' || view === 'billing-facturas' || view === 'billing-credit-notes'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Facturación electrónica</p>
+        <h1>{{ billingViewType }}</h1>
+        <p class="subtitle">Flujo completo: generación del comprobante, archivos XML/ZIP y preparación para SUNAT.</p>
+      </div>
+      <div class="hero__badge">Flujo SUNAT</div>
+    </header>
+
+    <section class="billing-layout">
+      <article class="card form-card">
+        <div class="section-head">
+          <h2>Generación del comprobante</h2>
+          <span>{{ billingViewType }}</span>
+        </div>
+
+        <form #billingFormRef="ngForm" id="billingFormRef" (ngSubmit)="generateBillingDocument(billingFormRef)" class="form-grid order-grid">
+          <label>
+            <span>Tipo</span>
+            <select name="billingType" [(ngModel)]="billingForm.type" (change)="onBillingTypeChange()" required>
+              <option *ngFor="let t of billingTypeOptions" [value]="t">{{ t }}</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Cliente</span>
+            <select name="billingClientId" [(ngModel)]="billingSelectedClientId" (change)="onBillingClientSelected()">
+              <option [ngValue]="null">
+                {{ billingForm.type === 'Nota de crédito' && billingSelectedClientId === null && (billingForm.clientName || billingForm.clientDocument) ? billingClientFallbackLabel() : 'Selecciona cliente (opcional)' }}
+              </option>
+              <option *ngIf="billingForm.type === 'Nota de crédito' && billingSelectedClientId !== null && !billingClientExistsInOptions()" [ngValue]="billingSelectedClientId">
+                {{ billingClientFallbackLabel() }}
+              </option>
+              <option *ngFor="let c of getBillingClientOptions()" [ngValue]="c.id">
+                {{ c.name }}
+              </option>
+            </select>
+          </label>
+
+          <p
+            class="subtitle"
+            *ngIf="billingForm.type === 'Nota de crédito' && billingSelectedClientId === null"
+            style="grid-column: 1 / -1; margin: -6px 0 0 0;"
+          >
+            El cliente se tomará del comprobante afectado al seleccionarlo.
+          </p>
+
+          <label>
+            <span>
+              Cliente (DNI o RUC)
+              <ng-container *ngIf="billingForm.type === 'Boleta'">
+                <span style="opacity: 0.85; font-weight: 500;">(DNI obligatorio si Total ≥ S/ 700)</span>
+              </ng-container>
+            </span>
+            <input
+              name="clientDocument"
+              [(ngModel)]="billingForm.clientDocument"
+              (ngModelChange)="onBillingClientDocumentChange()"
+              [required]="billingClientDocumentIsRequired()"
+              [placeholder]="billingForm.type === 'Boleta' ? 'DNI (8 dígitos) si Total ≥ 700; opcional si < 700' : ''"
+            />
+          </label>
+
+          <p
+            class="subtitle"
+            *ngIf="billingForm.type === 'Boleta' && !billingBoletaRequiresDni()"
+            style="grid-column: 1 / -1; margin: -6px 0 0 0;"
+          >
+            Si la venta es menor a S/ 700, el DNI no es obligatorio (recomendable). Si no ingresas datos, se usará "CLIENTE VARIOS".
+          </p>
+
+
+          <label *ngIf="billingSelectedClientId === null && billingForm.type !== 'Nota de crédito'">
+            <div class="field-head">
+              <span>Nombre</span>
+              <button
+                type="button"
+                class="field-action"
+                *ngIf="!billingClientNameEditable && billingClientNameAutoFilled"
+                (click)="enableBillingClientNameEdit()"
+              >
+                Editar
+              </button>
+            </div>
+            <input
+              name="clientName"
+              [(ngModel)]="billingForm.clientName"
+              [disabled]="!billingClientNameEditable"
+              [placeholder]="billingClientNameEditable ? '' : 'Se completa por DNI/RUC'"
+              [required]="billingClientNameIsRequired()"
+            />
+          </label>
+
+
+          <label *ngIf="billingForm.type !== 'Nota de crédito'">
+            <span>Detalle (pedido)</span>
+            <select name="billingOrderId" [(ngModel)]="billingSelectedOrderId" (change)="onBillingOrderSelected()">
+              <option [ngValue]="null">Manual / Sin pedido</option>
+              <option *ngFor="let o of getBillingOrderOptions()" [ngValue]="o.id">
+                #{{ o.id }} - {{ o.serviceType }} {{ o.quantity }} m3 (S/ {{ (o.price || 0) | number:'1.2-2' }} x {{ (o.quantity || 0) | number:'1.0-0' }} = S/ {{ ((o.price || 0) * (o.quantity || 0)) | number:'1.2-2' }})
+              </option>
+            </select>
+          </label>
+
+          <label *ngIf="billingForm.type !== 'Nota de crédito' && billingSelectedOrderId === null">
+            <span>Detalle (manual)</span>
+            <input name="detail" [(ngModel)]="billingForm.detail" required />
+          </label>
+
+          <label *ngIf="billingForm.type === 'Nota de crédito'">
+            <span>Detalle</span>
+            <input name="detail" [(ngModel)]="billingForm.detail" required />
+          </label>
+
+          <div *ngIf="billingForm.type === 'Nota de crédito'" style="grid-column: 1 / -1; padding: 12px; border-radius: 14px; border: 1px solid rgba(148,163,184,0.12); background: rgba(255,255,255,0.03);">
+            <div class="section-head" style="margin-bottom: 10px;">
+              <h2 style="font-size: 1rem;">Datos Nota de crédito (SUNAT)</h2>
+              <span>Documento afectado</span>
+            </div>
+
+            <div class="form-grid order-grid">
+              <label style="grid-column: 1 / -1;">
+                <span>Comprobante afectado (debe estar Aceptado)</span>
+                <select name="affectedBillingId" [(ngModel)]="billingAffectedBillingId" (change)="onBillingAffectedDocSelected()" required>
+                  <option [ngValue]="null">Selecciona comprobante (Boleta/Factura)</option>
+                  <option *ngFor="let d of getAffectableBillingDocs()" [ngValue]="d.id">
+                    {{ d.type }} {{ d.series }}-{{ (d.correlative || 0) | number:'4.0-0' }} - {{ d.clientName }}
+                  </option>
+                </select>
+              </label>
+
+              <label>
+                <span>Tipo documento afectado</span>
+                <select name="affectedDocType" [(ngModel)]="billingAffectedDocType" required>
+                  <option value="Factura">Factura</option>
+                  <option value="Boleta">Boleta</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Documento afectado (Serie-Correlativo)</span>
+                <input name="affectedDocId" [(ngModel)]="billingAffectedDocId" placeholder="Ej: F001-0001" required disabled />
+              </label>
+
+              <label>
+                <span>Código motivo</span>
+                <select name="creditNoteReasonCode" [(ngModel)]="billingCreditNoteReasonCode" (ngModelChange)="onCreditNoteReasonCodeChange()" required>
+                  <option *ngFor="let r of creditNoteReasonOptions" [value]="r.code">
+                    {{ r.code }} - {{ r.label }}
+                  </option>
+                </select>
+              </label>
+
+              <label>
+                <span>Motivo</span>
+                <input name="creditNoteReason" [(ngModel)]="billingCreditNoteReason" placeholder="Describe el motivo" required />
+              </label>
+
+              <label *ngIf="isCreditNoteReason('02')">
+                <span>Nuevo DNI/RUC (corrección)</span>
+                <input
+                  name="creditNoteNewClientDocument"
+                  [(ngModel)]="billingCreditNoteNewClientDocument"
+                  placeholder="DNI (8) o RUC (11)"
+                  required
+                />
+              </label>
+
+              <label *ngIf="isCreditNoteReason('02')">
+                <span>Nuevo nombre / razón social</span>
+                <input
+                  name="creditNoteNewClientName"
+                  [(ngModel)]="billingCreditNoteNewClientName"
+                  placeholder="Nombre corregido"
+                  required
+                />
+              </label>
+
+              <label *ngIf="isCreditNoteReason('03')" style="grid-column: 1 / -1;">
+                <span>Descripción corregida</span>
+                <input
+                  name="creditNoteCorrectedDetail"
+                  [(ngModel)]="billingCreditNoteCorrectedDetail"
+                  placeholder="Descripción corregida del ítem"
+                  required
+                />
+              </label>
+
+              <p class="subtitle" style="grid-column: 1 / -1; margin: 4px 0 0 0; opacity: 0.85;">
+                Monto se toma del comprobante afectado: Subtotal {{ billingForm.subtotal | number:'1.2-2' }}, IGV {{ (billingForm.subtotal * 0.18) | number:'1.2-2' }}, Total {{ (billingForm.subtotal * 1.18) | number:'1.2-2' }}.
+              </p>
+            </div>
+          </div>
+
+          <ng-container *ngIf="billingForm.type !== 'Nota de crédito'">
+            <label>
+              <span>Total</span>
+              <input
+                type="number"
+                name="total"
+                [(ngModel)]="billingForm.total"
+                (ngModelChange)="onBillingTotalChange()"
+                min="0"
+                required
+              />
+            </label>
+
+            <label>
+              <span>Subtotal</span>
+              <input [value]="billingForm.subtotal | number:'1.2-2'" disabled />
+            </label>
+
+            <label>
+              <span>IGV ({{ igvRate || 18 }}%)</span>
+              <input [value]="billingForm.igv | number:'1.2-2'" disabled />
+            </label>
+
+            <label>
+              <span>Certificado digital (.pfx)</span>
+              <input name="certificatePath" [(ngModel)]="billingForm.certificatePath" placeholder="/certificados/firma.pfx" required />
+            </label>
+          </ng-container>
+
+          <label *ngIf="billingForm.type === 'Nota de venta'" class="toggle-row" style="grid-column: 1 / -1;">
+            <input type="checkbox" [(ngModel)]="billingValidateSunat" name="billingValidateSunat" />
+            <span>
+              Validar y enviar a SUNAT (opcional). Si no se marca, la nota de venta no se env a SUNAT.
+            </span>
+          </label>
+
+          <div class="form-actions">
+            <button class="primary" type="submit">Generar comprobante</button>
+            <button class="secondary" type="button" (click)="resetBillingForm()">Limpiar</button>
+          </div>
+
+        </form>
+      </article>
+
+      <article class="card workflow-card">
+        <div class="section-head">
+          <h2>Flujo completo SUNAT</h2>
+          <span>XML + firma + ZIP</span>
+        </div>
+
+        <ol class="workflow-list">
+          <li>Generación del comprobante</li>
+          <li>XML UBL 2.1</li>
+          <li>Firma digital con .pfx</li>
+          <li>ZIP del XML</li>
+          <li>Envío a SUNAT o proveedor</li>
+          <li>CDR y estado final</li>
+        </ol>
+
+        <div class="files-box">
+          <p><strong>C:\Sunat - Sistema\&lt;Cliente (Documento)&gt;\&lt;SERIE-0001&gt;\&lt;RUC&gt;-&lt;TIPO&gt;-&lt;SERIE-0001&gt;.xml</strong> XML firmado (UBL 2.1)</p>
+          <p><strong>C:\Sunat - Sistema\&lt;Cliente (Documento)&gt;\&lt;SERIE-0001&gt;\&lt;RUC&gt;-&lt;TIPO&gt;-&lt;SERIE-0001&gt;.zip</strong> ZIP del XML</p>
+          <p><strong>C:\Sunat - Sistema\&lt;Cliente (Documento)&gt;\&lt;SERIE-0001&gt;\&lt;RUC&gt;-&lt;TIPO&gt;-&lt;SERIE-0001&gt;.pdf</strong> PDF generado</p>
+          <p><strong>C:\Sunat - Sistema\&lt;Cliente (Documento)&gt;\&lt;SERIE-0001&gt;\CDR-&lt;RUC&gt;-&lt;TIPO&gt;-&lt;SERIE-0001&gt;.xml</strong> CDR SUNAT</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="card table-card billing-table-card">
+      <div class="section-head">
+        <h2>Documentos emitidos</h2>
+        <span>{{ billingDocuments.length }} documentos</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Cliente</th>
+              <th>Detalle</th>
+              <th>Total</th>
+              <th>Estado SUNAT</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doc of billingDocuments">
+              <td>{{ doc.type }}</td>
+              <td>{{ doc.clientName }}<br /><span>{{ doc.clientDocument }}</span></td>
+              <td>{{ doc.detail }}</td>
+              <td>S/ {{ doc.total }}</td>
+              <td>{{ doc.sunatStatus }}</td>
+              <td class="actions billing-actions">
+                <button type="button" title="Ver e imprimir" (click)="openBillingPrint(doc)">🖨️ Imprimir</button>
+                <button type="button" title="Abrir carpeta" (click)="openBillingFolder(doc)">📁 Carpeta</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <div class="modal-backdrop" [class.modal-backdrop--visible]="billingPdfModalOpen" (click)="closeBillingPdfModal()"></div>
+  <div class="modal" [class.modal--visible]="billingPdfModalOpen" (click)="$event.stopPropagation()">
+    <div class="modal__head">
+      <div>
+        <div class="modal__title">Imprimir PDF</div>
+        <div class="modal__subtitle">{{ billingPdfTitle }}</div>
+      </div>
+      <button class="modal__close" type="button" (click)="closeBillingPdfModal()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="modal__body">
+      <p class="status" *ngIf="billingPdfLoading">Cargando PDF...</p>
+      <p class="status status--error" *ngIf="billingPdfError">{{ billingPdfError }}</p>
+
+      <iframe
+        *ngIf="billingPdfUrl"
+        id="billingPdfFrame"
+        [src]="billingPdfUrl"
+        style="width:100%; height:70vh; border:1px solid rgba(148,163,184,0.12); border-radius: 14px; background: rgba(255,255,255,0.03);"
+      ></iframe>
+    </div>
+
+    <div class="modal__actions">
+      <button class="primary" type="button" (click)="printBillingPdf()" [disabled]="!billingPdfUrl">Imprimir</button>
+      <button class="secondary" type="button" (click)="closeBillingPdfModal()">Cerrar</button>
+    </div>
+  </div>
+
+  <section class="content" *ngIf="view === 'billing-sunat'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Facturación electrónica</p>
+        <h1>Envíos a SUNAT</h1>
+        <p class="subtitle">Endpoint de prueba configurado. Para envío real vía billService, úsalo desde un backend/proxy SOAP.</p>
+      </div>
+      <div class="hero__badge">SUNAT</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Configuración SUNAT / OSE</h2>
+        <span>Modo de prueba</span>
+      </div>
+
+      <div class="form-grid order-grid">
+        <label>
+          <span>Entorno</span>
+          <select [(ngModel)]="sunatEnvironment" name="sunatEnvironment" (ngModelChange)="onSunatConfigFieldChange()">
+            <option value="Prueba">Prueba</option>
+            <option value="Producción">Producción</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Endpoint</span>
+          <input name="sunatEndpoint" [(ngModel)]="sunatEndpoint" (ngModelChange)="onSunatConfigFieldChange()" placeholder="https://e-beta.sunat.gob.pe/.../billService" />
+        </label>
+
+        <label>
+          <span>Token / credencial</span>
+          <input name="sunatToken" [(ngModel)]="sunatToken" (ngModelChange)="onSunatConfigFieldChange()" placeholder="USUARIO|CLAVE" />
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="button" (click)="testSunatConnection()">Probar conexión</button>
+          <button class="primary" type="button" (click)="saveSunatConfig()">Guardar</button>
+          <button class="secondary" type="button" (click)="resetSunatConfig()">Limpiar</button>
+        </div>
+
+        <p class="subtitle">Nota: SUNAT billService responde por SOAP. El frontend usa este endpoint como referencia y el envío real debe pasar por tu backend.</p>
+
+        <p class="status" *ngIf="sunatConfigMessage">{{ sunatConfigMessage }}</p>
+        <p class="status status--error" *ngIf="sunatConfigError">{{ sunatConfigError }}</p>
+
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Envío y respuesta</h2>
+        <span>API directa / proveedor</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Canal</th>
+              <th>XML</th>
+              <th>ZIP</th>
+              <th>CDR</th>
+              <th>Estado</th>
+              <th>Respuesta</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doc of billingDocuments">
+              <td>{{ doc.type }}<br /><span>{{ doc.clientName }}</span></td>
+              <td>{{ doc.channel }}</td>
+              <td>{{ doc.xmlPath }}</td>
+              <td>{{ doc.zipPath }}</td>
+              <td>{{ doc.cdrPath }}</td>
+              <td>{{ doc.sunatStatus }}</td>
+              <td>{{ doc.response }}</td>
+              <td class="actions">
+                <button type="button" (click)="sendBillingToSunat(doc.id, 'API directa SUNAT')">API directa</button>
+                <button type="button" (click)="sendBillingToSunat(doc.id, 'Nubefact')">Nubefact</button>
+                <button type="button" (click)="sendBillingToSunat(doc.id, 'Facturador SUNAT')">Facturador</button>
+                <button type="button" class="danger" (click)="rejectBilling(doc.id)">Rechazar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'billing-issued'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Facturación electrónica</p>
+        <h1>Documentos emitidos</h1>
+        <p class="subtitle">Repositorio de comprobantes con XML, CDR, PDF y ZIP.</p>
+      </div>
+      <div class="hero__badge">Emitidos</div>
+    </header>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Documentos emitidos</h2>
+        <span>Archivo completo</span>
+      </div>
+
+      <p class="status status--error" *ngIf="sunatEndpoint.trim() && hasBorradorBillingDocs()">
+        Hay documentos en <b>Borrador</b>. Revisa la columna <b>Respuesta</b> y el endpoint/configuraci de SUNAT/OSE.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>XML</th>
+              <th>CDR</th>
+              <th>PDF</th>
+              <th>ZIP</th>
+              <th>Estado</th>
+              <th>Respuesta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doc of billingDocuments">
+              <td>{{ doc.type }}<br /><span>{{ doc.clientName }}</span></td>
+              <td>{{ doc.xmlPath }}</td>
+              <td>{{ doc.cdrPath }}</td>
+              <td>{{ doc.pdfPath }}</td>
+              <td>{{ doc.zipPath }}</td>
+              <td>{{ doc.sunatStatus }}</td>
+              <td>{{ doc.response }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card history-card billing-files-card">
+      <div class="section-head">
+        <h2>Estructura de archivos</h2>
+        <span>C:\Sunat - Sistema\</span>
+      </div>
+
+      <div class="files-box">
+        <p>Cliente (Documento)\</p>
+        <p>&nbsp;&nbsp;SERIE-0001\</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;RUC-TIPO-SERIE-0001.xml</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;RUC-TIPO-SERIE-0001.zip</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;RUC-TIPO-SERIE-0001.pdf</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;CDR-RUC-TIPO-SERIE-0001.xml</p>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'reports'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Reportes</p>
+        <h1>Reportes</h1>
+        <p class="subtitle">Vista unificada: filtros, reportes y exportación (Excel/PDF) en un solo lugar.</p>
+      </div>
+      <div class="hero__badge">
+        {{ reportsTab === 'sales' ? (salesReports.length + ' días') : reportsTab === 'orders' ? (orderReports.length + ' clientes') : reportsTab === 'drivers' ? (driverReports.length + ' choferes') : (monthlyIncomes.length + ' meses') }}
+      </div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Centro de reportes</h2>
+        <span>ERP</span>
+      </div>
+
+      <div class="actions reports-tabs">
+        <button type="button" class="menu__item menu__item--ghost" [class.menu__item--active]="reportsTab === 'sales'" (click)="setReportsTab('sales')">Ventas</button>
+        <button type="button" class="menu__item menu__item--ghost" [class.menu__item--active]="reportsTab === 'orders'" (click)="setReportsTab('orders')">Pedidos x cliente</button>
+        <button type="button" class="menu__item menu__item--ghost" [class.menu__item--active]="reportsTab === 'drivers'" (click)="setReportsTab('drivers')">Choferes</button>
+        <button type="button" class="menu__item menu__item--ghost" [class.menu__item--active]="reportsTab === 'income'" (click)="setReportsTab('income')">Ingresos</button>
+      </div>
+
+      <div class="form-grid reports-filter-grid">
+        <label>
+          <span>Desde</span>
+          <input type="date" [(ngModel)]="reportDateFrom" name="reportDateFromUnified" (change)="refreshReports()" />
+        </label>
+        <label>
+          <span>Hasta</span>
+          <input type="date" [(ngModel)]="reportDateTo" name="reportDateToUnified" (change)="refreshReports()" />
+        </label>
+        <label *ngIf="reportsTab === 'orders'">
+          <span>Cliente</span>
+          <select [(ngModel)]="reportClientId" name="reportClientIdUnified" (change)="refreshReports()">
+            <option [ngValue]="null">Todos los clientes</option>
+            <option *ngFor="let client of clients" [ngValue]="client.id">{{ client.name }}</option>
+          </select>
+        </label>
+        <label *ngIf="reportsTab === 'drivers'">
+          <span>Chofer</span>
+          <select [(ngModel)]="reportDriverId" name="reportDriverIdUnified" (change)="refreshReports()">
+            <option [ngValue]="null">Todos los choferes</option>
+            <option *ngFor="let d of drivers" [ngValue]="d.id">{{ d.name }}</option>
+          </select>
+        </label>
+
+        <div class="form-actions reports-actions">
+          <button class="primary" type="button" (click)="refreshReports()" [disabled]="reportsLoading">
+            <span class="btn-icon">🔄</span>Actualizar
+          </button>
+          <button class="secondary" type="button" (click)="exportActiveReport('excel')" [disabled]="reportsLoading">
+            <span class="btn-icon">📊</span>Exportar Excel
+          </button>
+          <button class="secondary" type="button" (click)="exportActiveReport('pdf')" [disabled]="reportsLoading">
+            <span class="btn-icon">📄</span>Exportar PDF
+          </button>
+          <button class="secondary" type="button" (click)="exportAllReports()" [disabled]="reportsLoading">
+            <span class="btn-icon">🗜️</span>Exportar todo (ZIP)
+          </button>
+        </div>
+      </div>
+
+      <p class="status" *ngIf="reportsLoading" style="margin-top: 12px;">Cargando reportes...</p>
+      <p class="status status--error" *ngIf="reportsError" style="margin-top: 12px; white-space: pre-line;">{{ reportsError }}</p>
+      <p class="status status--error" *ngIf="reportExportError" style="margin-top: 12px; white-space: pre-line;">{{ reportExportError }}</p>
+    </section>
+
+    <section class="card table-card" *ngIf="reportsTab === 'sales'">
+      <div class="section-head">
+        <h2>Ventas por fecha</h2>
+        <span>{{ salesReports.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Pedidos</th>
+              <th>Total ventas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of salesReports">
+              <td>{{ report.date }}</td>
+              <td>{{ report.orderCount }}</td>
+              <td>S/ {{ report.totalSales }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card table-card" *ngIf="reportsTab === 'orders'">
+      <div class="section-head">
+        <h2>Pedidos por cliente</h2>
+        <span>{{ orderReports.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Documento</th>
+              <th>Pedidos</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of orderReports">
+              <td>{{ report.clientName }}</td>
+              <td>{{ report.clientDocument }}</td>
+              <td>{{ report.orderCount }}</td>
+              <td>S/ {{ report.totalAmount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card table-card" *ngIf="reportsTab === 'drivers'">
+      <div class="section-head">
+        <h2>Rendimiento de choferes</h2>
+        <span>{{ driverReports.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Chofer</th>
+              <th>Completados</th>
+              <th>Total entregas</th>
+              <th>Rating</th>
+              <th>% Entregado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of driverReports">
+              <td>{{ report.driverName }}</td>
+              <td>{{ report.completedOrders }}</td>
+              <td>{{ report.totalDeliveries }}</td>
+              <td>{{ report.rating }}/5</td>
+              <td>{{ report.onTimePercentage }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card chart-card" *ngIf="reportsTab === 'income'">
+      <div class="section-head">
+        <h2>Ingresos por mes</h2>
+        <span>{{ monthlyIncomes.length }} meses</span>
+      </div>
+
+      <div class="bars bars--sales">
+        <div class="bar-row" *ngFor="let item of monthlyIncomes">
+          <span>{{ item.month }}</span>
+          <div class="bar-track">
+            <div class="bar-fill" [style.width.%]="monthlyIncomes.length ? (item.income / (monthlyIncomes[monthlyIncomes.length - 1]?.income || 1)) * 100 : 0"></div>
+          </div>
+          <strong>S/ {{ item.income }}</strong>
+        </div>
+      </div>
+    </section>
+  
+  </section>
+
+  <!-- Legacy report views kept (not used by menu). -->
+  <section class="content" *ngIf="view === 'reports-sales'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Reportes</p>
+        <h1>Ventas por fecha</h1>
+        <p class="subtitle">Reporte de ventas filtrado por rango de fechas.</p>
+      </div>
+      <div class="hero__badge">{{ salesReports.length }} días</div>
+    </header>
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Filtros</h2>
+        <span>Rango de fechas</span>
+      </div>
+
+      <div class="form-grid route-date-grid">
+        <label>
+          <span>Desde</span>
+          <input type="date" [(ngModel)]="reportDateFrom" name="reportDateFrom" />
+        </label>
+        <label>
+          <span>Hasta</span>
+          <input type="date" [(ngModel)]="reportDateTo" name="reportDateTo" />
+        </label>
+        <div class="form-actions">
+          <button class="primary" type="button" (click)="generateSalesReport()">Generar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Ventas por fecha</h2>
+        <span>{{ salesReports.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Pedidos</th>
+              <th>Total ventas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of salesReports">
+              <td>{{ report.date }}</td>
+              <td>{{ report.orderCount }}</td>
+              <td>S/ {{ report.totalSales }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'reports-orders'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Reportes</p>
+        <h1>Pedidos por cliente</h1>
+        <p class="subtitle">Reporte de pedidos agrupados por cliente.</p>
+      </div>
+      <div class="hero__badge">{{ orderReports.length }} clientes</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Filtros</h2>
+        <span>Por cliente</span>
+      </div>
+
+      <div class="form-grid route-date-grid">
+        <label>
+          <span>Cliente</span>
+          <select [(ngModel)]="reportClientId" name="reportClientId">
+            <option [ngValue]="null">Todos los clientes</option>
+            <option *ngFor="let client of clients" [ngValue]="client.id">{{ client.name }}</option>
+          </select>
+        </label>
+        <div class="form-actions">
+          <button class="primary" type="button" (click)="generateOrderReport()">Generar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Pedidos por cliente</h2>
+        <span>{{ orderReports.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Documento</th>
+              <th>Pedidos</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of orderReports">
+              <td>{{ report.clientName }}</td>
+              <td>{{ report.clientDocument }}</td>
+              <td>{{ report.orderCount }}</td>
+              <td>S/ {{ report.totalAmount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'reports-drivers'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Reportes</p>
+        <h1>Rendimiento de choferes</h1>
+        <p class="subtitle">Estadísticas de entregas, rating y puntualidad.</p>
+      </div>
+      <div class="hero__badge">{{ driverReports.length }} choferes</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Generar reporte</h2>
+        <span>Rendimiento</span>
+      </div>
+
+      <div class="form-actions">
+        <button class="primary" type="button" (click)="generateDriverReport()">Actualizar datos</button>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Rendimiento de choferes</h2>
+        <span>{{ driverReports.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Chofer</th>
+              <th>Completados</th>
+              <th>Total entregas</th>
+              <th>Rating</th>
+              <th>% a tiempo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of driverReports">
+              <td>{{ report.driverName }}</td>
+              <td>{{ report.completedOrders }}</td>
+              <td>{{ report.totalDeliveries }}</td>
+              <td>{{ report.rating }}/5</td>
+              <td>{{ report.onTimePercentage }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'reports-income'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Reportes</p>
+        <h1>Ingresos mensuales</h1>
+        <p class="subtitle">Resumen de ingresos por mes del año.</p>
+      </div>
+      <div class="hero__badge">12 meses</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Generar reporte</h2>
+        <span>Ingresos</span>
+      </div>
+
+      <div class="form-actions">
+        <button class="primary" type="button" (click)="generateMonthlyIncome()">Actualizar datos</button>
+      </div>
+    </section>
+
+    <section class="card chart-card">
+      <div class="section-head">
+        <h2>Ingresos mensuales</h2>
+        <span>Año 2026</span>
+      </div>
+
+      <div class="bars bars--sales">
+        <div class="bar-row" *ngFor="let item of monthlyIncomes">
+          <span>{{ item.month }}</span>
+          <div class="bar-track">
+            <div class="bar-fill" [style.width.%]="(item.income / 20000) * 100"></div>
+          </div>
+          <strong>S/ {{ item.income }}</strong>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'reports-export'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Reportes</p>
+        <h1>Exportación</h1>
+        <p class="subtitle">Exporta los reportes a Excel o PDF.</p>
+      </div>
+      <div class="hero__badge">Archivos</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Exportar reporte</h2>
+        <span>Formato</span>
+      </div>
+
+      <div class="form-grid route-date-grid">
+        <label>
+          <span>Formato</span>
+          <select [(ngModel)]="reportExportFormat" name="reportExportFormat">
+            <option value="excel">Excel</option>
+            <option value="pdf">PDF</option>
+          </select>
+        </label>
+        <div class="form-actions">
+          <button class="primary" type="button" (click)="exportActiveReport('excel')">Exportar a Excel</button>
+          <button class="secondary" type="button" (click)="exportActiveReport('pdf')">Exportar a PDF</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card history-card">
+      <div class="section-head">
+        <h2>Reportes disponibles</h2>
+        <span>Selecciona uno</span>
+      </div>
+
+      <ul class="history-list">
+        <li (click)="openReportsSales()">Ventas por fecha</li>
+        <li (click)="openReportsOrders()">Pedidos por cliente</li>
+        <li (click)="openReportsDrivers()">Rendimiento de choferes</li>
+        <li (click)="openReportsIncome()">Ingresos mensuales</li>
+      </ul>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'config-company'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Configuración</p>
+        <h1>Datos de la empresa</h1>
+        <p class="subtitle">Información legal y datos de identificación ante SUNAT.</p>
+      </div>
+      <div class="hero__badge">Empresa</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Datos de la empresa</h2>
+        <span>{{ companyConfigured ? (companyEditUnlocked ? 'Edición habilitada' : 'Bloqueado') : 'Primer registro' }}</span>
+      </div>
+
+      <form #companyFormRef="ngForm" (ngSubmit)="saveCompanyData()" class="form-grid">
+        <label>
+          <span>Razón social</span>
+          <input name="name" [(ngModel)]="companyData.name" [disabled]="!canEditCompanyData()" required />
+        </label>
+
+        <label>
+          <span>RUC</span>
+          <input name="ruc" [(ngModel)]="companyData.ruc" maxlength="11" [disabled]="!canEditCompanyData()" required />
+        </label>
+
+        <label>
+          <span>Dirección</span>
+          <input name="address" [(ngModel)]="companyData.address" [disabled]="!canEditCompanyData()" required />
+        </label>
+
+        <label>
+          <span>Ubigeo</span>
+          <input name="ubigeo" [(ngModel)]="companyData.ubigeo" maxlength="6" placeholder="Ej: 150101" [disabled]="!canEditCompanyData()" required />
+        </label>
+
+        <label>
+          <span>Urbanización</span>
+          <input name="urbanizacion" [(ngModel)]="companyData.urbanizacion" [disabled]="!canEditCompanyData()" />
+        </label>
+
+        <label>
+          <span>Distrito</span>
+          <input name="distrito" [(ngModel)]="companyData.distrito" [disabled]="!canEditCompanyData()" required />
+        </label>
+
+        <label>
+          <span>Provincia</span>
+          <input name="provincia" [(ngModel)]="companyData.provincia" [disabled]="!canEditCompanyData()" required />
+        </label>
+
+        <label>
+          <span>Departamento</span>
+          <input name="departamento" [(ngModel)]="companyData.departamento" [disabled]="!canEditCompanyData()" required />
+        </label>
+
+        <label>
+          <span>Teléfono</span>
+          <input name="phone" [(ngModel)]="companyData.phone" [disabled]="!canEditCompanyData()" required />
+        </label>
+
+        <label>
+          <span>Email</span>
+          <input type="email" name="email" [(ngModel)]="companyData.email" [disabled]="!canEditCompanyData()" required />
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit" *ngIf="canEditCompanyData()">Guardar</button>
+          <button class="secondary" type="button" *ngIf="companyConfigured && !companyEditUnlocked" (click)="unlockCompanyData()">Editar</button>
+          <button class="secondary" type="button" *ngIf="companyConfigured && companyEditUnlocked" (click)="cancelCompanyEdit()">Cancelar</button>
+        </div>
+
+        <p class="status" *ngIf="companyConfigured && !companyEditUnlocked">
+          Los datos están bloqueados. Para editar se requiere password administrador.
+        </p>
+
+      </form>
+    </section>
+  </section>
+
+
+  <div class="modal-backdrop" [class.modal-backdrop--visible]="companyPasswordModalOpen" (click)="closeCompanyPasswordModal()"></div>
+  <div class="modal" [class.modal--visible]="companyPasswordModalOpen" (click)="$event.stopPropagation()">
+    <div class="modal__head">
+      <div>
+        <div class="modal__title">Validación</div>
+        <div class="modal__subtitle">Ingresa la contraseña para editar datos de empresa</div>
+      </div>
+      <button class="modal__close" type="button" (click)="closeCompanyPasswordModal()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="modal__body form-grid">
+      <label>
+        <span>Contraseña</span>
+        <input
+          type="password"
+          name="companyPassword"
+          [(ngModel)]="companyPasswordValue"
+          placeholder="Password"
+          (keydown.enter)="confirmCompanyPassword()"
+        />
+      </label>
+
+      <p class="status status--error" *ngIf="companyPasswordError">{{ companyPasswordError }}</p>
+    </div>
+
+    <div class="modal__actions">
+      <button class="primary" type="button" (click)="confirmCompanyPassword()">Validar</button>
+      <button class="secondary" type="button" (click)="closeCompanyPasswordModal()">Cancelar</button>
+    </div>
+  </div>
+
+
+  <section class="content" *ngIf="view === 'config-igv'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Configuración</p>
+        <h1>IGV</h1>
+        <p class="subtitle">Porcentaje del Impuesto General a las Ventas.</p>
+      </div>
+      <div class="hero__badge">{{ igvRate }}%</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Configurar IGV</h2>
+        <span>Porcentaje</span>
+      </div>
+
+      <form #igvFormRef="ngForm" (ngSubmit)="saveIgvRate()" class="form-grid route-date-grid">
+        <label>
+          <span>IGV (%)</span>
+          <input type="number" name="igvRate" [(ngModel)]="igvRate" min="0" max="100" required />
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">Guardar IGV</button>
+        </div>
+
+      </form>
+    </section>
+
+    <section class="card history-card">
+      <div class="section-head">
+        <h2>Información</h2>
+        <span>Impuesto</span>
+      </div>
+
+      <div class="files-box">
+        <p>IGV actual: <strong>{{ igvRate }}%</strong></p>
+        <p>Aplica a todos los comprobantes de venta.</p>
+        <p>法定: 18% ( Peruá )</p>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'config-certificate'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Configuración</p>
+        <h1>Certificado digital</h1>
+        <p class="subtitle">Archivo .pfx para firma digital de comprobantes.</p>
+      </div>
+      <div class="hero__badge">.pfx</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Configurar certificado</h2>
+        <span>Firma digital</span>
+      </div>
+
+      <form #certFormRef="ngForm" (ngSubmit)="saveCertificate()" class="form-grid cert-grid">
+        <label class="cert-grid__full">
+          <div class="field-head">
+            <span>Ruta del archivo (.pfx)</span>
+            <button type="button" class="field-action" (click)="pickCertificateFile(certFileInput)" [disabled]="certificateUploadLoading">
+              {{ certificateUploadLoading ? 'Cargando...' : 'Cargar' }}
+            </button>
+          </div>
+          <input name="certPath" [(ngModel)]="certificateConfig.path" placeholder="C:\\Sunat - Sistema\\Certificado Digital\\CERT-1.pfx" required />
+          <input
+            #certFileInput
+            type="file"
+            accept=".pfx"
+            style="display:none"
+            (change)="onCertificateFileSelected($event)"
+          />
+        </label>
+
+        <label>
+          <span>Contraseña</span>
+          <input type="password" name="certPassword" [(ngModel)]="certificateConfig.password" placeholder="Contraseña del certificado" />
+        </label>
+
+        <label>
+          <span>Fecha de vencimiento</span>
+          <input type="date" name="expiration" [(ngModel)]="certificateConfig.expiration" disabled />
+        </label>
+
+        <div class="form-actions cert-grid__full">
+          <button class="primary" type="submit">Guardar certificado</button>
+        </div>
+      </form>
+
+      <div class="cert-grid__full" style="height: 1px; background: rgba(148,163,184,0.15); margin: 8px 0;"></div>
+
+      <div class="form-grid cert-grid">
+        <label>
+          <span>Usuario SOL (SUNAT)</span>
+          <input name="sunatSolUser" [(ngModel)]="sunatSolUser" (ngModelChange)="onSunatSolCredsChange()" placeholder="USUARIO" autocomplete="off" />
+        </label>
+
+        <label>
+          <span>Clave SOL (SUNAT)</span>
+          <input type="password" name="sunatSolPass" [(ngModel)]="sunatSolPass" (ngModelChange)="onSunatSolCredsChange()" placeholder="CLAVE" autocomplete="new-password" />
+        </label>
+      </div>
+
+      <p class="status" *ngIf="sunatSolMessage">{{ sunatSolMessage }}</p>
+      <p class="status status--error" *ngIf="sunatSolError">{{ sunatSolError }}</p>
+    </section>
+
+    <section class="card history-card">
+      <div class="section-head">
+        <h2>Instrucciones</h2>
+        <span>Certificado</span>
+      </div>
+
+      <div class="files-box">
+        <p>1. Solicita tu certificado digital a una CA autorizada.</p>
+        <p>2. Convierte el .cer a formato .pfx con clave.</p>
+        <p>3. Sube el archivo al servidor.</p>
+        <p>4. Vencimiento: {{ certificateConfig.expiration }}</p>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'config-series'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Configuración</p>
+        <h1>Series de comprobantes</h1>
+        <p class="subtitle">Define la serie y el correlativo inicial. Solo se registra una vez; para cambios se solicita password.</p>
+      </div>
+      <div class="hero__badge">Series</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Configuración</h2>
+        <span>Boleta / Factura / Notas</span>
+      </div>
+
+      <div class="form-grid">
+        <div
+          class="card"
+          style="padding:14px;border-radius:18px;background:rgba(255,255,255,0.03);border:1px solid rgba(148,163,184,0.12);"
+          *ngFor="let opt of seriesScopeOptions"
+        >
+          <div class="section-head" style="margin-bottom:12px;">
+            <h2 style="font-size:1.05rem;">{{ opt.title }}</h2>
+            <span>{{ isSeriesConfigured(opt.docType, opt.scope) ? 'Configurado' : 'Pendiente' }}</span>
+          </div>
+
+          <p class="subtitle" style="margin:0 0 10px 0;">{{ opt.subtitle }}</p>
+
+          <div class="form-grid order-grid">
+            <label>
+              <span>Serie</span>
+              <input
+                [(ngModel)]="seriesForm[opt.docType + '::' + opt.scope].series"
+                name="series-{{opt.docType}}-{{opt.scope}}"
+                [placeholder]="opt.placeholder"
+                [disabled]="isSeriesConfigured(opt.docType, opt.scope) && !isSeriesUnlocked(opt.docType, opt.scope)"
+              />
+            </label>
+
+            <label>
+              <span>Correlativo inicial</span>
+              <input
+                type="number"
+                [(ngModel)]="seriesForm[opt.docType + '::' + opt.scope].nextCorrelative"
+                name="corr-{{opt.docType}}-{{opt.scope}}"
+                min="1"
+                [disabled]="isSeriesConfigured(opt.docType, opt.scope) && !isSeriesUnlocked(opt.docType, opt.scope)"
+              />
+            </label>
+          </div>
+
+          <div class="form-actions" style="margin-top:12px;">
+            <button
+              class="primary"
+              type="button"
+              *ngIf="!isSeriesConfigured(opt.docType, opt.scope)"
+              (click)="saveSeries(opt.docType, opt.scope)"
+            >Guardar</button>
+
+            <button
+              class="primary"
+              type="button"
+              *ngIf="isSeriesConfigured(opt.docType, opt.scope) && !isSeriesUnlocked(opt.docType, opt.scope)"
+              (click)="openSeriesPasswordModal(opt.docType, opt.scope)"
+            >Editar</button>
+
+            <button
+              class="primary"
+              type="button"
+              *ngIf="isSeriesConfigured(opt.docType, opt.scope) && isSeriesUnlocked(opt.docType, opt.scope)"
+              (click)="saveSeries(opt.docType, opt.scope)"
+            >Guardar cambios</button>
+
+            <button
+              class="secondary"
+              type="button"
+              *ngIf="isSeriesConfigured(opt.docType, opt.scope) && isSeriesUnlocked(opt.docType, opt.scope)"
+              (click)="cancelSeriesEdit(opt.docType, opt.scope)"
+            >Cancelar</button>
+
+            <button class="secondary" type="button" (click)="loadDocumentSeries()">Recargar</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </section>
+
+  <div class="modal-backdrop" [class.modal-backdrop--visible]="seriesPasswordModalOpen" (click)="closeSeriesPasswordModal()"></div>
+  <div class="modal" [class.modal--visible]="seriesPasswordModalOpen" (click)="$event.stopPropagation()">
+    <div class="modal__head">
+      <div>
+        <div class="modal__title">Validación</div>
+        <div class="modal__subtitle">Ingresa la contraseña para editar series</div>
+      </div>
+      <button class="modal__close" type="button" (click)="closeSeriesPasswordModal()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="modal__body form-grid">
+      <label>
+        <span>Contraseña</span>
+        <input
+          type="password"
+          name="seriesPassword"
+          [(ngModel)]="seriesPasswordValue"
+          placeholder="Password"
+          (keydown.enter)="confirmSeriesPassword()"
+        />
+      </label>
+
+      <p class="status status--success" *ngIf="seriesPasswordMessage">{{ seriesPasswordMessage }}</p>
+      <p class="status status--error" *ngIf="seriesPasswordError">{{ seriesPasswordError }}</p>
+    </div>
+
+    <div class="modal__actions">
+      <button class="primary" type="button" (click)="confirmSeriesPassword()">Validar</button>
+      <button class="secondary" type="button" (click)="closeSeriesPasswordModal()">Cancelar</button>
+    </div>
+  </div>
+
+
+  <section class="content" *ngIf="view === 'users-list'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Usuarios / Seguridad</p>
+        <h1>Usuarios</h1>
+        <p class="subtitle">Gestión de usuarios del sistema.</p>
+      </div>
+      <div class="hero__badge">{{ users.length }} usuarios</div>
+    </header>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Usuarios</h2>
+        <span>{{ users.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Tipo</th>
+              <th>Expira</th>
+              <th>Creado</th>
+              <th>Último acceso</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.role }}</td>
+              <td>{{ user.status }}</td>
+              <td>{{ userTypeLabel(user) }}</td>
+              <td>{{ formatUserExpiresAt(user.expiresAt) }}</td>
+              <td>{{ user.createdAt }}</td>
+              <td>{{ user.lastLogin }}</td>
+              <td class="actions">
+                <button type="button" (click)="editUser(user)">Editar</button>
+                <button type="button" (click)="openUserResetPasswordModal(user)">Reset clave</button>
+                <button type="button" class="danger" (click)="deleteUser(user.id)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'users-new'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Usuarios / Seguridad</p>
+        <h1>{{ editingUserId === null ? 'Nuevo usuario' : 'Editar usuario' }}</h1>
+        <p class="subtitle">Registra usuarios con roles y permisos.</p>
+      </div>
+      <div class="hero__badge">Usuario</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Datos del usuario</h2>
+        <span>Credenciales</span>
+      </div>
+
+      <form #userFormRef="ngForm" (ngSubmit)="saveUser(userFormRef)" class="form-grid">
+        <label>
+          <span>Usuario</span>
+          <input name="username" [(ngModel)]="userForm.username" required />
+        </label>
+
+        <label>
+          <span>Email</span>
+          <input type="email" name="email" [(ngModel)]="userForm.email" required />
+        </label>
+
+        <label>
+          <span>Contraseña {{ editingUserId === null ? '' : '(opcional para actualizar)' }}</span>
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="userForm.password"
+            [required]="editingUserId === null"
+            [placeholder]="editingUserId === null ? 'Mínimo 8 caracteres (letra y número)' : 'Dejar vacío para conservar la actual'"
+            autocomplete="new-password"
+          />
+        </label>
+
+        <label>
+          <span>Rol</span>
+          <select name="role" [(ngModel)]="userForm.role" required>
+            <option *ngFor="let role of roleOptions" [value]="role">{{ role }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Estado</span>
+          <select name="status" [(ngModel)]="userForm.status" required>
+            <option *ngFor="let status of userStatusOptions" [value]="status">{{ status }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Usuario temporal</span>
+          <select name="isTemporary" [(ngModel)]="userForm.isTemporary" (ngModelChange)="onUserTemporaryChanged()">
+            <option [ngValue]="false">No</option>
+            <option [ngValue]="true">Sí</option>
+          </select>
+        </label>
+
+        <label *ngIf="userForm.isTemporary">
+          <span>Fecha y hora de expiración</span>
+          <input type="datetime-local" name="expiresAt" [(ngModel)]="userForm.expiresAt" required />
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">Guardar usuario</button>
+          <button class="secondary" type="button" (click)="openNewUser()">Limpiar</button>
+        </div>
+
+      </form>
+    </section>
+  </section>
+
+  <div class="modal-backdrop" [class.modal-backdrop--visible]="userResetPasswordModalOpen" (click)="closeUserResetPasswordModal()"></div>
+  <div class="modal" [class.modal--visible]="userResetPasswordModalOpen" (click)="$event.stopPropagation()">
+    <div class="modal__head">
+      <div>
+        <div class="modal__title">Resetear contraseña</div>
+        <div class="modal__subtitle">Usuario: {{ userResetPasswordUsername }}</div>
+      </div>
+      <button class="modal__close" type="button" (click)="closeUserResetPasswordModal()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="modal__body form-grid">
+      <label>
+        <span>Nueva contraseña</span>
+        <input type="password" [(ngModel)]="userResetPasswordValue" name="userResetPasswordValue" autocomplete="new-password" />
+      </label>
+      <label>
+        <span>Confirmar contraseña</span>
+        <input type="password" [(ngModel)]="userResetPasswordConfirm" name="userResetPasswordConfirm" autocomplete="new-password" />
+      </label>
+      <p class="status status--error" *ngIf="userResetPasswordError">{{ userResetPasswordError }}</p>
+    </div>
+
+    <div class="modal__actions">
+      <button class="primary" type="button" (click)="confirmUserResetPassword()">Guardar</button>
+      <button class="secondary" type="button" (click)="closeUserResetPasswordModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <section class="content" *ngIf="view === 'roles-list'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Usuarios / Seguridad</p>
+        <h1>Roles</h1>
+        <p class="subtitle">Definición de roles del sistema.</p>
+      </div>
+      <div class="hero__badge">{{ roles.length }} roles</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>{{ editingRoleId === null ? 'Agregar rol' : 'Editar rol' }}</h2>
+        <span>Datos del rol</span>
+      </div>
+
+      <form #roleFormInlineRef="ngForm" (ngSubmit)="saveRole(roleFormInlineRef)" class="form-grid">
+        <label>
+          <span>Nombre del rol</span>
+          <select name="name" [(ngModel)]="roleForm.name" [disabled]="editingRoleId !== null" required>
+            <option *ngFor="let role of roleOptions" [value]="role">{{ role }}</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Descripción</span>
+          <input name="description" [(ngModel)]="roleForm.description" required />
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">{{ editingRoleId === null ? 'Guardar rol' : 'Actualizar rol' }}</button>
+          <button class="secondary" type="button" (click)="openNewRole()">Limpiar</button>
+        </div>
+
+        <p class="status" *ngIf="roleMessage">{{ roleMessage }}</p>
+        <p class="status status--error" *ngIf="roleError">{{ roleError }}</p>
+      </form>
+    </section>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Roles</h2>
+        <span>{{ roles.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Rol</th>
+              <th>Descripción</th>
+              <th>Permisos</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let role of roles">
+              <td>{{ role.name }}</td>
+              <td>{{ role.description }}</td>
+              <td>{{ role.permissions.join(', ') }}</td>
+              <td class="actions">
+                <button type="button" (click)="editRole(role)">Editar</button>
+                <button type="button" class="danger" (click)="deleteRole(role.id)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  
+
+  <section class="content" *ngIf="view === 'permissions-list'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Usuarios / Seguridad</p>
+        <h1>Permisos</h1>
+        <p class="subtitle">Listado de permisos del sistema.</p>
+      </div>
+      <div class="hero__badge">{{ permissions.length }} permisos</div>
+    </header>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Permisos</h2>
+        <span>{{ permissions.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Módulo</th>
+              <th>Descripción</th>
+              <th>Tipo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let perm of permissions">
+              <td>{{ perm.module }}</td>
+              <td>{{ perm.description }}</td>
+              <td>{{ perm.type }}</td>
+              <td class="actions">
+                <button type="button" (click)="openPermissionsEdit()">Editar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'permissions-edit'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Usuarios / Seguridad</p>
+        <h1>Editar permisos</h1>
+        <p class="subtitle">Configura permisos por módulo.</p>
+      </div>
+      <div class="hero__badge">Editar</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Permisos</h2>
+        <span>Configuración</span>
+      </div>
+
+      <div class="form-grid">
+        <label *ngFor="let perm of permissions" class="toggle-row">
+          <input type="checkbox" [checked]="perm.type === 'admin' || perm.type === 'write'" />
+          <span><strong>{{ perm.module }}</strong> - {{ perm.description }}</span>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="button" (click)="savePermissions()">Guardar permisos</button>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="card history-card">
+      <div class="section-head">
+        <h2>Roles definidos</h2>
+        <span>Admin, Operador, Chofer</span>
+      </div>
+
+      <div class="files-box">
+        <p><strong>Admin</strong>: Acceso completo (all)</p>
+        <p><strong>Operador</strong>: clientes, orders, billing</p>
+        <p><strong>Chofer</strong>: solo rutas (routes)</p>
+      </div>
+    </section>
+  </section>
+
+  <section class="content" *ngIf="view === 'security-audit'">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Usuarios / Seguridad</p>
+        <h1>Auditoría de seguridad</h1>
+        <p class="subtitle">Trazabilidad de autenticación y operaciones sensibles.</p>
+      </div>
+      <div class="hero__badge">{{ auditLogs.length }} eventos</div>
+    </header>
+
+    <section class="card form-card">
+      <div class="section-head">
+        <h2>Filtros</h2>
+        <span>Auth Audit</span>
+      </div>
+
+      <div class="form-grid audit-filter-grid">
+        <label>
+          <span>Evento</span>
+          <input name="auditFilterEventType" [(ngModel)]="auditFilterEventType" placeholder="login, refresh, logout..." />
+        </label>
+        <label>
+          <span>Resultado</span>
+          <select name="auditFilterSuccess" [(ngModel)]="auditFilterSuccess">
+            <option value="">Todos</option>
+            <option value="1">Exitoso</option>
+            <option value="0">Fallido</option>
+          </select>
+        </label>
+        <label>
+          <span>Desde</span>
+          <input type="datetime-local" name="auditFilterFrom" [(ngModel)]="auditFilterFrom" />
+        </label>
+        <label>
+          <span>Hasta</span>
+          <input type="datetime-local" name="auditFilterTo" [(ngModel)]="auditFilterTo" />
+        </label>
+
+        <div class="form-actions audit-actions" style="grid-column: 1 / -1;">
+          <button class="primary" type="button" (click)="loadAuthAuditLogs()" [disabled]="auditLoading">Actualizar</button>
+          <button class="secondary" type="button" (click)="clearAuditFilters()" [disabled]="auditLoading">Limpiar</button>
+          <button class="secondary" type="button" (click)="exportAuditCsv()" [disabled]="auditLoading || auditLogs.length === 0">Exportar CSV</button>
+        </div>
+      </div>
+
+      <p class="status" *ngIf="auditLoading">Cargando auditoría...</p>
+      <p class="status status--error" *ngIf="auditError">{{ auditError }}</p>
+    </section>
+
+    <section class="card table-card">
+      <div class="section-head">
+        <h2>Eventos</h2>
+        <span>{{ auditLogs.length }} registros</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Usuario</th>
+              <th>Evento</th>
+              <th>Resultado</th>
+              <th>IP</th>
+              <th>Mensaje</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of auditLogs">
+              <td>{{ row.createdAt }}</td>
+              <td>{{ row.username || ('#' + row.userId) }}</td>
+              <td>{{ row.eventType }}</td>
+              <td>{{ row.success ? 'OK' : 'FALLÓ' }}</td>
+              <td>{{ formatAuditIp(row.ip) }}</td>
+              <td>{{ row.message }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+</main>
