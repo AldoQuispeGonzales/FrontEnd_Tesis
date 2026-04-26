@@ -207,7 +207,7 @@ interface AuthAuditLog {
 }
 
 const DEFAULT_LOCAL_API_BASE_URL = 'http://localhost:3000/api';
-const DEFAULT_REMOTE_API_BASE_URL = 'https://backend-tesis-uu6a.onrender.com/api';
+const DEFAULT_REMOTE_API_BASE_URL = 'https://backend-tesis-r3zf.onrender.com/api';
 
 function normalizeApiBaseUrl(raw: string): string {
   const base = String(raw || '').trim().replace(/\/$/, '');
